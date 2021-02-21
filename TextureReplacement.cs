@@ -78,7 +78,21 @@ namespace VSideLoader
 						{
 							if (texture is Texture2D tex2d)
 							{
-								File.WriteAllBytes(Path.Combine(dumpPath, texName + ".png"), DuplicateTexture(tex2d).EncodeToPNG());
+								Texture2D newTexture = DuplicateTexture(tex2d);
+								if (Settings.normalMap.Contains(propertyName))
+								{
+									Color[] pixels = newTexture.GetPixels();
+									for (int i = 0; i < pixels.Length; i++)
+									{
+										pixels[i].r *= pixels[i].a;
+										float x = pixels[i].r * 2f - 1f;
+										float y = pixels[i].g * 2f - 1f;
+										pixels[i].b = (Mathf.Sqrt(1f - x * x - y * y) + 1f) / 2f;
+										pixels[i].a = 1f;
+									}
+									newTexture.SetPixels(pixels);
+								}
+								File.WriteAllBytes(Path.Combine(dumpPath, texName + ".png"), newTexture.EncodeToPNG());
 							}
 							else
 							{
@@ -112,6 +126,17 @@ namespace VSideLoader
 							tex.filterMode = Settings.textureFilter.Value;
 							if (tex.LoadImage(File.ReadAllBytes(texPath), true))
 							{
+								if (Settings.normalMap.Contains(propertyName))
+								{
+									Color[] pixels = tex.GetPixels();
+									for (int i = 0; i < pixels.Length; i++)
+									{
+										pixels[i].a = pixels[i].r;
+										pixels[i].r = 1f;
+										pixels[i].b = pixels[i].g;
+									}
+									tex.SetPixels(pixels);
+								}
 								VSideLoader.Logger.LogInfo("Loaded " + Path.GetFileName(texPath) + " (" + tex.width + "x" + tex.height + ") for " + material.name + "." + propertyName);
 								material.SetTexture(propertyName, tex);
 							}
@@ -132,7 +157,7 @@ namespace VSideLoader
 		private static Texture2D DuplicateTexture(Texture2D source)
 		{
 			// TODO: This is causing very slight 1 bit corruption
-			RenderTexture renderTex = RenderTexture.GetTemporary(source.width, source.height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
+			RenderTexture renderTex = RenderTexture.GetTemporary(source.width, source.height, 0, RenderTextureFormat.ARGB32, source.graphicsFormat.ToString().EndsWith("_SRGB") ? RenderTextureReadWrite.sRGB : RenderTextureReadWrite.Linear);
 			Graphics.Blit(source, renderTex);
 			Texture2D texture = RenderToTexture(renderTex);
 			RenderTexture.ReleaseTemporary(renderTex);
