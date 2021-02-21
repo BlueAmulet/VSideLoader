@@ -37,26 +37,7 @@ namespace VSideLoader
 			"silver_ore_m",
 			"silver_ore_n"
 		};
-		internal static string[] normalMap =
-		{
-			"_BumpMap",
-			"_ChestBumpMap",
-			"_LegsBumpMap",
-			"_SkinBumpMap",
-			"_Normal",
-			"_NormalTex",
-			"_DetailNormalMap",
-			"_CliffNormal",
-			"_CultivatedNormal",
-			"_DirtNormal",
-			"_ForestNormal",
-			"_GrassNormal",
-			"_PavedNormal",
-			"_RainNormal",
-			"_RefractionNormal",
-			"_RockNormal",
-			"_SnowNormal"
-		};
+		internal static string[] normalFix;
 
 		static Settings()
 		{
@@ -85,7 +66,7 @@ namespace VSideLoader
 			useTextureName = configFile.Bind("Texture", "UseTextureName", true, "Use texture names instead of material name");
 			blackList = configFile.Bind("Texture", "BlackList", String.Join(",", blackList), "Textures not to dump").Value.Split(',');
 			ignoreName = configFile.Bind("Texture", "IgnoreName", String.Join(",", ignoreName), "Texture names to ignore").Value.Split(',');
-			normalMap = configFile.Bind("Texture", "NormalMap", String.Join(",", normalMap), "Property names containing DXT5nm normal maps").Value.Split(',');
+			normalFix = configFile.Bind("Texture", "NormalFix", String.Join(",", TextureReplacement.normalMap), "Property names containing DXT5nm normal maps").Value.Split(',');
 		}
 
 		public static bool MyWriteDescription(ref ConfigEntryBase __instance, ref StreamWriter writer)

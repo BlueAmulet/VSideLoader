@@ -16,7 +16,42 @@ namespace VSideLoader
 		private static Dictionary<string, Texture> texSet = new Dictionary<string, Texture>();
 		private static Dictionary<string, Texture> loadedTextures = new Dictionary<string, Texture>();
 
-		private static string[] smokeNames = { "aoe_smoke_MainTex", "build_fog_lowres_MainTex", "darklands_groundfog_MainTex", "dev_smoke_MainTex", "evileyes_particles_MainTex", "fog_MainTex", "forest_groundmist_MainTex", "ghost_smoke_MainTex", "godray_MainTex", "green_smoke_MainTex", "ooze_smoke_MainTex", "SmokeBlob_MainTex", "swamp_mist_low_MainTex" };
+		private static string[] smokeNames = {
+			"aoe_smoke_MainTex",
+			"build_fog_lowres_MainTex",
+			"darklands_groundfog_MainTex",
+			"dev_smoke_MainTex",
+			"evileyes_particles_MainTex",
+			"fog_MainTex",
+			"forest_groundmist_MainTex",
+			"ghost_smoke_MainTex",
+			"godray_MainTex",
+			"green_smoke_MainTex",
+			"ooze_smoke_MainTex",
+			"SmokeBlob_MainTex",
+			"swamp_mist_low_MainTex"
+		};
+
+		internal static string[] normalMap =
+		{
+			"_BumpMap",
+			"_ChestBumpMap",
+			"_LegsBumpMap",
+			"_SkinBumpMap",
+			"_Normal",
+			"_NormalTex",
+			"_DetailNormalMap",
+			"_CliffNormal",
+			"_CultivatedNormal",
+			"_DirtNormal",
+			"_ForestNormal",
+			"_GrassNormal",
+			"_PavedNormal",
+			"_RainNormal",
+			"_RefractionNormal",
+			"_RockNormal",
+			"_SnowNormal"
+		};
 
 		internal static void OnSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
 		{
@@ -79,7 +114,7 @@ namespace VSideLoader
 							if (texture is Texture2D tex2d)
 							{
 								Texture2D newTexture = DuplicateTexture(tex2d);
-								if (Settings.normalMap.Contains(propertyName))
+								if (Settings.normalFix.Contains(propertyName))
 								{
 									Color[] pixels = newTexture.GetPixels();
 									for (int i = 0; i < pixels.Length; i++)
@@ -116,7 +151,7 @@ namespace VSideLoader
 							}
 							else
 							{
-								tex = new Texture2D(2, 2);
+								tex = new Texture2D(2, 2, TextureFormat.RGBA32, true, normalMap.Contains(propertyName));
 								loadedTextures.Add(texPath, tex);
 							}
 							if (texture != null)
@@ -124,9 +159,9 @@ namespace VSideLoader
 								tex.name = texture.name;
 							}
 							tex.filterMode = Settings.textureFilter.Value;
-							if (tex.LoadImage(File.ReadAllBytes(texPath), true))
+							if (tex.LoadImage(File.ReadAllBytes(texPath), !Settings.normalFix.Contains(propertyName)))
 							{
-								if (Settings.normalMap.Contains(propertyName))
+								if (Settings.normalFix.Contains(propertyName) && tex.isReadable)
 								{
 									Color[] pixels = tex.GetPixels();
 									for (int i = 0; i < pixels.Length; i++)
