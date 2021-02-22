@@ -19,8 +19,15 @@ namespace VSideLoader
 			{
 				if (array[0] == "reloadtextures")
 				{
-					TextureReplacement.HandleTextures(false);
-					__instance.Print("Reloaded textures");
+					if (Settings.textureLoad.Value)
+					{
+						TextureReplacement.HandleTextures(false);
+						__instance.Print("Reloaded textures");
+					}
+					else
+					{
+						__instance.Print("Texture loading not enabled in config");
+					}
 				}
 			}
 		}
