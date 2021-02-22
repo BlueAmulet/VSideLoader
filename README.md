@@ -16,6 +16,8 @@ BepInEx\plugins\Textures\Dump
 BepInEx\plugins\Textures\Load  
 It will also create a config file at BepInEx\config\VSideLoader.cfg
 
+VSideLoader adds a new command called "reloadtextures", to quickly reload textures in game
+
 Dump: (default false)  
 If enabled, dumps all textures to the `BepInEx\plugins\Textures\Dump` folder  
 Load: (default true)  

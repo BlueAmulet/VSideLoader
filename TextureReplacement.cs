@@ -14,7 +14,7 @@ namespace VSideLoader
 	internal static class TextureReplacement
 	{
 		private static Dictionary<string, Texture> texSet = new Dictionary<string, Texture>();
-		private static Dictionary<string, Texture> loadedTextures = new Dictionary<string, Texture>();
+		private static Dictionary<string, TextureInfo> loadedTextures = new Dictionary<string, TextureInfo>();
 
 		private static string[] smokeNames = {
 			"aoe_smoke_MainTex",
@@ -53,7 +53,7 @@ namespace VSideLoader
 			"_SnowNormal"
 		};
 
-		internal static void OnSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
+		internal static void HandleTextures(bool allowDump)
 		{
 			string basePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Textures");
 			string dumpPath = Path.Combine(basePath, "Dump");
@@ -75,7 +75,7 @@ namespace VSideLoader
 					Texture texture = material.GetTexture(propertyName);
 					if (texture != null)
 					{
-						bool dumpTexture = true;
+						bool dumpTexture = allowDump;
 						if (Settings.useTextureName.Value && !Settings.ignoreName.Contains(texture.name))
 						{
 							texName = texture.name;
@@ -92,7 +92,7 @@ namespace VSideLoader
 						{
 							texName = matTexName;
 						}
-						if (Settings.blackList.Contains(texName) || loadedTextures.ContainsValue(texture))
+						if (Settings.blackList.Contains(texName) || loadedTextures.Any(pair => pair.Value.tex == texture))
 						{
 							// ignore texture
 							dumpTexture = false;
@@ -145,39 +145,55 @@ namespace VSideLoader
 						if (File.Exists(texPath))
 						{
 							Texture2D tex;
+							bool needsLoad = false;
+							DateTime time = File.GetLastWriteTime(texPath);
 							if (loadedTextures.ContainsKey(texPath))
 							{
-								tex = (Texture2D)loadedTextures[texPath]; // Reuse existing texture
+								tex = loadedTextures[texPath].tex; // Reuse existing texture
+								if (!loadedTextures[texPath].time.Equals(time))
+								{
+									needsLoad = true;
+								}
 							}
 							else
 							{
 								tex = new Texture2D(2, 2, TextureFormat.RGBA32, true, normalMap.Contains(propertyName));
-								loadedTextures.Add(texPath, tex);
+								loadedTextures.Add(texPath, new TextureInfo(tex, new DateTime()));
+								needsLoad = true;
 							}
 							if (texture != null)
 							{
 								tex.name = texture.name;
 							}
 							tex.filterMode = Settings.textureFilter.Value;
-							if (tex.LoadImage(File.ReadAllBytes(texPath), !Settings.normalFix.Contains(propertyName)))
+							if (needsLoad)
 							{
-								if (Settings.normalFix.Contains(propertyName) && tex.isReadable)
+								if (tex.LoadImage(File.ReadAllBytes(texPath), !Settings.normalFix.Contains(propertyName)))
 								{
-									Color[] pixels = tex.GetPixels();
-									for (int i = 0; i < pixels.Length; i++)
+									if (Settings.normalFix.Contains(propertyName) && tex.isReadable)
 									{
-										pixels[i].a = pixels[i].r;
-										pixels[i].r = 1f;
-										pixels[i].b = pixels[i].g;
+										Color[] pixels = tex.GetPixels();
+										for (int i = 0; i < pixels.Length; i++)
+										{
+											pixels[i].a = pixels[i].r;
+											pixels[i].r = 1f;
+											pixels[i].b = pixels[i].g;
+										}
+										tex.SetPixels(pixels);
 									}
-									tex.SetPixels(pixels);
+									VSideLoader.Logger.LogInfo("Loaded " + Path.GetFileName(texPath) + " (" + tex.width + "x" + tex.height + ") for " + material.name + "." + propertyName);
+									material.SetTexture(propertyName, tex);
+									loadedTextures[texPath].time = time;
 								}
-								VSideLoader.Logger.LogInfo("Loaded " + Path.GetFileName(texPath) + " (" + tex.width + "x" + tex.height + ") for " + material.name + "." + propertyName);
-								material.SetTexture(propertyName, tex);
+								else
+								{
+									VSideLoader.Logger.LogError("Failed to load " + Path.GetFileName(texPath));
+								}
 							}
 							else
 							{
-								VSideLoader.Logger.LogError("Failed to load " + Path.GetFileName(texPath));
+								VSideLoader.Logger.LogInfo("Reusing loaded texture " + Path.GetFileName(texPath) + " for " + material.name + "." + propertyName);
+								material.SetTexture(propertyName, tex);
 							}
 						}
 					}
@@ -187,6 +203,11 @@ namespace VSideLoader
 			{
 				VSideLoader.Logger.LogInfo("Found " + texSet.Count + " textures");
 			}
+		}
+
+		internal static void OnSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
+		{
+			HandleTextures(true);
 		}
 
 		private static Texture2D DuplicateTexture(Texture2D source)

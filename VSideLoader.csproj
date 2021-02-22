@@ -35,8 +35,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="CleanShader.cs" />
+    <Compile Include="ConsoleUtils.cs" />
     <Compile Include="DeferredShader.cs" />
     <Compile Include="Settings.cs" />
+    <Compile Include="TextureInfo.cs" />
     <Compile Include="TextureReplacement.cs" />
     <Compile Include="VSideLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
