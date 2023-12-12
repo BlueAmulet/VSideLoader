@@ -1,11 +1,8 @@
-using BepInEx;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -13,10 +10,10 @@ namespace VSideLoader
 {
 	internal static class TextureReplacement
 	{
-		private static Dictionary<string, Texture> texSet = new Dictionary<string, Texture>();
-		private static Dictionary<string, TextureInfo> loadedTextures = new Dictionary<string, TextureInfo>();
+		private static readonly Dictionary<string, Texture> texSet = new Dictionary<string, Texture>();
+		private static readonly Dictionary<string, TextureInfo> loadedTextures = new Dictionary<string, TextureInfo>();
 
-		private static string[] smokeNames = {
+		private static readonly string[] smokeNames = {
 			"aoe_smoke_MainTex",
 			"build_fog_lowres_MainTex",
 			"darklands_groundfog_MainTex",
@@ -120,9 +117,9 @@ namespace VSideLoader
 									for (int i = 0; i < pixels.Length; i++)
 									{
 										pixels[i].r *= pixels[i].a;
-										float x = pixels[i].r * 2f - 1f;
-										float y = pixels[i].g * 2f - 1f;
-										pixels[i].b = (Mathf.Sqrt(1f - x * x - y * y) + 1f) / 2f;
+										float x = (pixels[i].r * 2f) - 1f;
+										float y = (pixels[i].g * 2f) - 1f;
+										pixels[i].b = (Mathf.Sqrt(1f - (x * x) - (y * y)) + 1f) / 2f;
 										pixels[i].a = 1f;
 									}
 									newTexture.SetPixels(pixels);

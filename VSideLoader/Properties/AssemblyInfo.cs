@@ -4,11 +4,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("VSideLoader")]
+[assembly: AssemblyTitle(VSideLoader.VSideLoader.PluginName)]
 [assembly: AssemblyDescription("SideLoader for Valheim")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("VSideLoader")]
+[assembly: AssemblyProduct(VSideLoader.VSideLoader.PluginName)]
 [assembly: AssemblyCopyright("Copyright © BlueAmulet 2021")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

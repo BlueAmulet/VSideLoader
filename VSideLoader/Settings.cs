@@ -12,7 +12,7 @@ namespace VSideLoader
 	internal static class Settings
 	{
 		private static ConfigFile configFile;
-		private static Dictionary<Type, string> typeStr = new Dictionary<Type, string>();
+		private static readonly Dictionary<Type, string> typeStr = new Dictionary<Type, string>();
 
 		internal static ConfigEntry<bool> betterLighting;
 		internal static ConfigEntry<bool> textureDump;
